@@ -22,7 +22,7 @@ logger = logging.getLogger("GDAM")
 import zmq
 from datetime import datetime
 
-from glider_binary_data_reader.glider_bd_reader import (
+from glider_binary_data_reader import (
     GliderBDReader,
     MergedGliderBDReader
 )
@@ -52,12 +52,12 @@ class GliderPairInserter(object):
         )
         self.collection = self.db[self.collection_name]
 
-    remove_time_fields = [
+    remove_time_fields = (
         'm_present_time-timestamp',
         'sci_m_present_time-timestamp'
-    ]
+    )
 
-    gps_fields = ["m_gps_lon-lon", "m_lon-lon", "c_wpt_lon-lon"]
+    gps_fields = ("m_gps_lon-lon", "m_lon-lon", "c_wpt_lon-lon")
 
     def __find_GPS(self, data):
         for field in self.gps_fields:
