@@ -180,11 +180,12 @@ class GliderFileProcessor(ProcessEvent):
         inserter.update_file_timespan()
 
         self.publish_segment_processed(
-            glider, segment_id, flight_file, science_file,
+            glider, segment_id,
+            path, flight_file, science_file,
             merged_reader, inserter
         )
 
-    def publish_segment_processed(self, glider, segment_id, flight_file, science_file, merged_reader, inserter):  # NOQA
+    def publish_segment_processed(self, glider, segment_id, path, flight_file, science_file, merged_reader, inserter):  # NOQA
         # Create ZMQ context and socket for publishing files
         context = zmq.Context()
         socket = context.socket(zmq.PUB)
@@ -199,6 +200,7 @@ class GliderFileProcessor(ProcessEvent):
             'processed': inserter.processed.isoformat(),
             'start': inserter.start.isoformat(),
             'end': inserter.end.isoformat(),
+            'path': path,
             'flight_file': flight_file,
             'science_file': science_file,
             'glider': glider,
