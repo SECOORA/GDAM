@@ -12,6 +12,7 @@
 # College of Marine Science
 # Ocean Technology Group
 
+import os
 from pyinotify import(
     ProcessEvent
 )
@@ -161,15 +162,13 @@ class GliderFileProcessor(ProcessEvent):
             return
 
         # Read the file
+        flight_path = os.path.join(path, flight_file)
         flight_reader = GliderBDReader(
-            path,
-            pair[0],
-            [flight_file]
+            [flight_path]
         )
+        science_path = os.path.join(path, science_file)
         science_reader = GliderBDReader(
-            path,
-            pair[1],
-            [science_file]
+            [science_path]
         )
         merged_reader = MergedGliderBDReader(
             flight_reader, science_reader
