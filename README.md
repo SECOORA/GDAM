@@ -1,4 +1,3 @@
-GDAM
-====
+# Glider Database - Mongo (GDBMONGO)
 
-Teledyne Webb Glider Database Alternative with Mongo
+A MongoDB store for Teledyne Webb Gliders

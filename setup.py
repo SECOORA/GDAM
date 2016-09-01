@@ -1,12 +1,12 @@
 from distutils.core import setup
 
 setup(
-    name='Glider Database Alternative with Mongo',
+    name='Glider Database - Mongo',
     version='1.0',
     author='Michael Lindemuth',
     author_email='mlindemu@usf.edu',
-    packages=['glider_database_alternative_mongo'],
+    packages=['gdbmongo'],
     scripts=[
-        'glider_database_alternative_mongo/gdam.py',
+        'gdbmongo/gdam.py',
     ]
 )

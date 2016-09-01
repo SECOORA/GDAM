@@ -41,7 +41,7 @@ from pyinotify import (
     IN_MOVED_TO
 )
 
-from glider_database_alternative_mongo.processor import GliderFileProcessor
+from gdbmongo.processor import GliderFileProcessor
 
 
 def main():

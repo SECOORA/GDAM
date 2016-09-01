@@ -23,7 +23,7 @@ logger = logging.getLogger("GDAM")
 import zmq
 from datetime import datetime
 
-from glider_binary_data_reader import (
+from gbdr import (
     GliderBDReader,
     MergedGliderBDReader
 )
