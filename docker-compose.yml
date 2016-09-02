@@ -1,0 +1,37 @@
+version: '2'
+
+services:
+
+  mongo:
+    image: mongo
+    ports:
+      - 60200:27017
+
+  web:
+    image: mongo-express
+    ports:
+      - 60201:8081
+    depends_on:
+      - mongo
+
+  watcher:
+    build: "."
+    environment:
+      MONGO_URL: "mongodb://db:27017"
+      ZMQ_URL: "tcp://watcher:4444"
+      GDB_DATA_DIR: /data
+    volumes:
+      - "./data:/data"
+    depends_on:
+      - mongo
+    ports:
+      - "60202:4444"
+    entrypoint: "docker/wait.sh mongo:27017 --strict --timeout=120 -- /sbin/my_init -- python /code/gdbmongo/cli.py"
+
+  listener:
+    build: "."
+    environment:
+      ZMQ_URL: "tcp://watcher:4444"
+    depends_on:
+      - watcher
+    entrypoint: "docker/wait.sh mongo:27017 --strict --timeout=120 -- /sbin/my_init -- python /code/gdbmongo/listen.py"

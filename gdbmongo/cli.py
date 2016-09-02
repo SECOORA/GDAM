@@ -49,18 +49,27 @@ logger.addHandler(logging.StreamHandler())
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Monitor a directory for new glider data.  "
+        description="Monitor a directory for new glider data. "
                     "Processes and uploads new data to a Mongo Database. "
                     "Announce changes via ZMQ."
     )
     parser.add_argument(
-        "glider_directory_path",
-        help="Path to configuration file"
+        "-d",
+        "--data_path",
+        help="Path to Glider data directory",
+        default=os.environ.get('GDB_DATA_DIR')
     )
     parser.add_argument(
         "--zmq_url",
-        help="Port to publish ZMQ messages on.  8008 by default.",
-        default='tcp://127.0.0.1:8008'
+        help='Port to publish ZMQ messages on. '
+             'Default is "tcp://127.0.0.1:8008".',
+        default=os.environ.get('ZMQ_URL', 'tcp://127.0.0.1:8008')
+    )
+    parser.add_argument(
+        "--mongo_url",
+        help='Mongo Database URL.  Can include authentication parameters. '
+             'Default is "mongodb://localhost:27017".',
+        default=os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
     )
     parser.add_argument(
         "--daemonize",
@@ -68,32 +77,22 @@ def main():
         type=bool,
         default=False
     )
-    parser.add_argument(
-        "--pid_file",
-        help="Where to look for and put the PID file",
-        default="/tmp/gdam.pid"
-    )
-    parser.add_argument(
-        "--log_file",
-        help="Full path of file to log to",
-        default="./gdam.log"
-    )
-    parser.add_argument(
-        "--mongo_url",
-        help="Mongo Database URL.  Can include authentication parameters",
-        default="mongodb://localhost"
-    )
 
     args = parser.parse_args()
 
-    monitor_path = args.glider_directory_path
+    if not args.data_path:
+        logger.error("Please provide a --data_path attribute or set the GDB_DATA_DIR "
+                     "environmental variable")
+        sys.exit(parser.print_usage())
+
+    monitor_path = args.data_path
     if monitor_path[-1] == '/':
         monitor_path = monitor_path[:-1]
 
     wm = WatchManager()
     mask = IN_MOVED_TO | IN_CLOSE_WRITE
     wdd = wm.add_watch(
-        args.glider_directory_path,
+        args.data_path,
         mask,
         rec=True,
         auto_add=True
@@ -112,8 +111,8 @@ def main():
     signal.signal(signal.SIGTERM, handler)
 
     try:
-        logger.info("Starting")
-        notifier.loop(daemonize=args.daemonize, pid_file=args.pid_file)
+        logger.info("Starting...")
+        notifier.loop(daemonize=args.daemonize)
     except NotifierError:
         logger.exception('Unable to start notifier loop')
         return 1

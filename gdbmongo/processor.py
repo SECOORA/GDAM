@@ -27,8 +27,14 @@ from gdbmongo import logger
 
 
 class GliderPairInserter(object):
-    """Inserts data from a pair of glider files into GDAM
-    """
+    """ Inserts data from a pair of glider files into GDAM """
+
+    remove_time_fields = (
+        'm_present_time-timestamp',
+        'sci_m_present_time-timestamp'
+    )
+
+    gps_fields = ("m_gps_lon-lon", "m_lon-lon", "c_wpt_lon-lon")
 
     def __init__(self, glider, pair, mongo_url, dbname='GDAM'):
         self.glider = glider
@@ -47,13 +53,6 @@ class GliderPairInserter(object):
             pair[1]
         )
         self.collection = self.db[self.collection_name]
-
-    remove_time_fields = (
-        'm_present_time-timestamp',
-        'sci_m_present_time-timestamp'
-    )
-
-    gps_fields = ("m_gps_lon-lon", "m_lon-lon", "c_wpt_lon-lon")
 
     def __find_GPS(self, data):
         for field in self.gps_fields:
