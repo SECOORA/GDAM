@@ -42,7 +42,7 @@ from pyinotify import (
 from gdbmongo.processor import GliderFileProcessor
 
 import logging
-from gsps import logger
+from gdbmongo import logger
 logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
