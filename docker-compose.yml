@@ -26,7 +26,7 @@ services:
       - mongo
     ports:
       - "60202:4444"
-    entrypoint: "docker/wait.sh mongo:27017 --strict --timeout=120 -- /sbin/my_init -- python /code/gdbmongo/cli.py"
+    entrypoint: "docker/wait.sh mongo:27017 --strict --timeout=120 -- /sbin/my_init -- python /code/gdam/cli.py"
 
   listener:
     build: "."
@@ -34,4 +34,4 @@ services:
       ZMQ_URL: "tcp://watcher:4444"
     depends_on:
       - watcher
-    entrypoint: "docker/wait.sh mongo:27017 --strict --timeout=120 -- /sbin/my_init -- python /code/gdbmongo/listen.py"
+    entrypoint: "docker/wait.sh mongo:27017 --strict --timeout=120 -- /sbin/my_init -- python /code/gdam/listen.py"

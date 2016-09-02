@@ -23,7 +23,7 @@ from pyinotify import ProcessEvent
 
 from gbdr import GliderBDReader, MergedGliderBDReader
 
-from gdbmongo import logger
+from gdam import logger
 
 
 class GliderPairInserter(object):

@@ -3,11 +3,11 @@
 from distutils.core import setup
 
 setup(
-    name='gdbmongo',
+    name='gdam',
     version='1.0',
     author='Michael Lindemuth',
     author_email='mlindemu@usf.edu',
-    packages=['gdbmongo'],
+    packages=['gdam'],
     install_requires=[
         'gbdr',
         'pyinotify',
@@ -15,6 +15,6 @@ setup(
         'pyzmq',
     ],
     scripts=[
-        'gdbmongo/gdam.py',
+        'gdam/cli.py',
     ]
 )

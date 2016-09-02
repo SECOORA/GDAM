@@ -39,10 +39,10 @@ from pyinotify import (
     IN_MOVED_TO
 )
 
-from gdbmongo.processor import GliderFileProcessor
+from gdam.processor import GliderFileProcessor
 
 import logging
-from gdbmongo import logger
+from gdam import logger
 logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
