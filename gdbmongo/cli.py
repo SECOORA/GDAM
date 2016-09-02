@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # GDAM - Glider Database Alternative with Mongo
 #
@@ -26,12 +26,10 @@
 # College of Marine Science
 # Ocean Technology Group
 
-import argparse
-import sys
 import os
+import sys
 import signal
-import logging
-logger = logging.getLogger("GDAM")
+import argparse
 
 from pyinotify import (
     WatchManager,
@@ -42,6 +40,11 @@ from pyinotify import (
 )
 
 from gdbmongo.processor import GliderFileProcessor
+
+import logging
+from gsps import logger
+logger.setLevel(logging.INFO)
+logger.addHandler(logging.StreamHandler())
 
 
 def main():
@@ -55,10 +58,9 @@ def main():
         help="Path to configuration file"
     )
     parser.add_argument(
-        "--zmq_port",
+        "--zmq_url",
         help="Port to publish ZMQ messages on.  8008 by default.",
-        type=int,
-        default=8008
+        default='tcp://127.0.0.1:8008'
     )
     parser.add_argument(
         "--daemonize",
@@ -69,7 +71,7 @@ def main():
     parser.add_argument(
         "--pid_file",
         help="Where to look for and put the PID file",
-        default="./gdam.pid"
+        default="/tmp/gdam.pid"
     )
     parser.add_argument(
         "--log_file",
@@ -84,50 +86,39 @@ def main():
 
     args = parser.parse_args()
 
-    # Check environment variable if not mongo URL specified
-    if args.mongo_url == "mongodb://localhost":
-        args.mongo_url = os.environ.get('GDAM_MONGO_URL', args.mongo_url)
-
-    # Setup logger
-    logger.setLevel(logging.INFO)
-    formatter = logging.Formatter("%(asctime)s - %(name)s "
-                                  "- %(levelname)s - %(message)s")
-    if args.daemonize:
-        log_handler = logging.FileHandler(args.log_file)
-    else:
-        log_handler = logging.StreamHandler(sys.stdout)
-    log_handler.setFormatter(formatter)
-    logger.addHandler(log_handler)
-
     monitor_path = args.glider_directory_path
     if monitor_path[-1] == '/':
         monitor_path = monitor_path[:-1]
 
     wm = WatchManager()
     mask = IN_MOVED_TO | IN_CLOSE_WRITE
-    wdd = wm.add_watch(args.glider_directory_path, mask,
-                       rec=True, auto_add=True)
+    wdd = wm.add_watch(
+        args.glider_directory_path,
+        mask,
+        rec=True,
+        auto_add=True
+    )
 
-    processor = GliderFileProcessor(args.zmq_port, args.mongo_url)
+    processor = GliderFileProcessor(
+        zmq_url=args.zmq_url,
+        mongo_url=args.mongo_url
+    )
     notifier = Notifier(wm, processor)
 
     def handler(signum, frame):
         wm.rm_watch(wdd.values())
         processor.stop()
         notifier.stop()
-
     signal.signal(signal.SIGTERM, handler)
 
     try:
         logger.info("Starting")
         notifier.loop(daemonize=args.daemonize, pid_file=args.pid_file)
-    except NotifierError, err:
-        logger.error('Unable to start notifier loop: %s' % err)
+    except NotifierError:
+        logger.exception('Unable to start notifier loop')
         return 1
 
-    logger.info(
-        "Glider Database Alternative with Mongo Service Exited Successfully"
-    )
+    logger.info("GBDMONGO Exited Successfully")
     return 0
 
 if __name__ == '__main__':
