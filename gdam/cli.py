@@ -111,13 +111,17 @@ def main():
     signal.signal(signal.SIGTERM, handler)
 
     try:
-        logger.info("Starting...")
+        logger.info("Watching {}\nInserting into {}\nPublishing to {}".format(
+            args.data_path,
+            args.mongo_url,
+            args.zmq_url)
+        )
         notifier.loop(daemonize=args.daemonize)
     except NotifierError:
         logger.exception('Unable to start notifier loop')
         return 1
 
-    logger.info("GBDMONGO Exited Successfully")
+    logger.info("GDAM Exited Successfully")
     return 0
 
 if __name__ == '__main__':
