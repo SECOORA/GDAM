@@ -27,7 +27,7 @@ test:
         - gdam.listen
         - gdam.processor
     commands:
-        - gdam-cli
+        - gdam-cli -h
 
 about:
     home: https://github.com/axiom-data-science/GDAM
