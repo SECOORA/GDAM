@@ -10,4 +10,4 @@ cat << "EOF"
 EOF
 echo "Version: $GDAM_VERSION"
 
-exec gdam-cli -d $DATA_ROOT
+exec gdam-cli -d $GDB_DATA_DIR
