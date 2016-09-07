@@ -19,7 +19,9 @@ reqs = [line.strip() for line in open('requirements.txt') if not line.startswith
 setup(
     name='gdam',
     version=version(),
-    description='A MongoDB store for Teledyne Webb Gliders.',
+    description='Watches a directory for new *db flight/science files and '
+                'inserts the data into a MongoDB instance and then publishes '
+                'the data to a ZeroMQ socket.',
     long_description=readme(),
     license='MIT',
     author='Michael Lindemuth',

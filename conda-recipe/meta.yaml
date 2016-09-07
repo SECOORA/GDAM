@@ -1,0 +1,35 @@
+package:
+    name: gdam
+    version: "1.0.1"
+
+source:
+    path: ../
+
+build:
+    number: 0
+    script: python setup.py install --single-version-externally-managed --record=record.txt
+
+requirements:
+    build:
+        - python
+        - setuptools
+    run:
+        - python
+        - gbdr
+        - pyinotify
+        - pymongo
+        - pyzmq
+
+test:
+    imports:
+        - gdam
+        - gdam.cli
+        - gdam.listen
+        - gdam.processor
+    commands:
+        - gdam-cli
+
+about:
+    home: https://github.com/axiom-data-science/GDAM
+    license: MIT License
+    summary: 'A MongoDB store for Teledyne Webb Gliders.'
