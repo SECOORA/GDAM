@@ -18,20 +18,12 @@ services:
     build: "."
     environment:
       MONGO_URL: "mongodb://db:27017"
-      ZMQ_URL: "tcp://watcher:4444"
+      ZMQ_URL: "tcp://watcher:44444"
       GDB_DATA_DIR: /data
     volumes:
       - "./data:/data"
     depends_on:
       - mongo
     ports:
-      - "60202:4444"
-    entrypoint: "docker/wait.sh mongo:27017 --strict --timeout=120 -- /sbin/my_init -- python /code/gdam/cli.py"
-
-  listener:
-    build: "."
-    environment:
-      ZMQ_URL: "tcp://watcher:4444"
-    depends_on:
-      - watcher
-    entrypoint: "docker/wait.sh mongo:27017 --strict --timeout=120 -- /sbin/my_init -- python /code/gdam/listen.py"
+      - "60202:44444"
+    entrypoint: "docker/wait.sh mongo:27017 --strict --timeout=120 -- /sbin/my_init"

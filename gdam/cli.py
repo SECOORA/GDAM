@@ -28,7 +28,6 @@
 
 import os
 import sys
-import signal
 import argparse
 
 from pyinotify import (
@@ -43,11 +42,12 @@ from gdam.processor import GliderFileProcessor
 
 import logging
 from gdam import logger
-logger.setLevel(logging.INFO)
-logger.addHandler(logging.StreamHandler())
 
 
 def main():
+    logger.setLevel(logging.INFO)
+    logger.addHandler(logging.StreamHandler())
+
     parser = argparse.ArgumentParser(
         description="Monitor a directory for new glider data. "
                     "Processes and uploads new data to a Mongo Database. "
@@ -62,8 +62,8 @@ def main():
     parser.add_argument(
         "--zmq_url",
         help='Port to publish ZMQ messages on. '
-             'Default is "tcp://127.0.0.1:8008".',
-        default=os.environ.get('ZMQ_URL', 'tcp://127.0.0.1:8008')
+             'Default is "tcp://127.0.0.1:44444".',
+        default=os.environ.get('ZMQ_URL', 'tcp://127.0.0.1:44444')
     )
     parser.add_argument(
         "--mongo_url",
@@ -81,8 +81,8 @@ def main():
     args = parser.parse_args()
 
     if not args.data_path:
-        logger.error("Please provide a --data_path attribute or set the GDB_DATA_DIR "
-                     "environmental variable")
+        logger.error("Please provide a --data_path agrument or set the "
+                     "GDB_DATA_DIR environmental variable")
         sys.exit(parser.print_usage())
 
     monitor_path = args.data_path
@@ -91,7 +91,7 @@ def main():
 
     wm = WatchManager()
     mask = IN_MOVED_TO | IN_CLOSE_WRITE
-    wdd = wm.add_watch(
+    wm.add_watch(
         args.data_path,
         mask,
         rec=True,
@@ -103,12 +103,6 @@ def main():
         mongo_url=args.mongo_url
     )
     notifier = Notifier(wm, processor)
-
-    def handler(signum, frame):
-        wm.rm_watch(wdd.values())
-        processor.stop()
-        notifier.stop()
-    signal.signal(signal.SIGTERM, handler)
 
     try:
         logger.info("Watching {}\nInserting into {}\nPublishing to {}".format(

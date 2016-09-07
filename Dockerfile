@@ -47,9 +47,17 @@ RUN conda install -y \
         && \
     conda clean -a -y
 
-EXPOSE 4444
+RUN mkdir /etc/service/gdam
+COPY docker/gdam /etc/service/gdam/run
 
+EXPOSE 44444
+
+ENV GDAM_VERSION 1.0.1
+ENV DATA_ROOT /data
 ENV PROJECT_ROOT /code
+
+VOLUME $DATA_ROOT
 RUN mkdir -p "$PROJECT_ROOT"
 COPY . $PROJECT_ROOT
 WORKDIR $PROJECT_ROOT
+RUN pip install .
