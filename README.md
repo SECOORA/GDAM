@@ -10,9 +10,9 @@ Watches a directory for new *db flight/science files and inserts the data into a
 Available through [`conda`](http://conda.pydata.org/docs/install/quick.html). This library requires Python 3.5 or above.
 
 ```
-conda create -n sgs python=3.5
-source activate sgs
-conda install -c axiom-data-science gdam
+$ conda create -n sgs python=3.5
+$ source activate sgs
+$ conda install -c axiom-data-science gdam
 ```
 
 #### Docker
@@ -63,7 +63,7 @@ $ docker run -it \
     -name sgs-gdam \
     -v "ZMQ_URL=tcp://127.0.0.1:9000" \
     -v "MONGO_URL=mongodb://localhost:27017" \
-    axiom/gdam
+    axiom/GDAM
 Watching /data
 Inserting into mongodb://localhost:27017
 Publishing to tcp://127.0.0.1:9000
