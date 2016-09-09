@@ -50,3 +50,10 @@ after_success:
   - if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TAG" != "latest" ]; then
     anaconda -t $ANACONDA_TOKEN upload --force -u axiom-data-science $HOME/miniconda/**/*.tar.bz2;
     fi
+
+deploy:
+  provider: releases
+  api_key:
+    secure: EtV7nLqv4VMKvocHNdZMt+4YQJ/YN/y4vDNGGrtA10Hlg0E/TY7K7BFU5so3JATgkwzSIp62+7HaWy/8emSxA5q+h+kSswSlVxBWjcO/F9kP6FGHyjnQPFdEFWiwbTqJWkL+Xl8dyj6m4vM2p9EOXY8zewV+cDUufzlzr4m25XHM5j2cwtnlAdqA3Z9lyNrV1jzEBlshjw92mD7fB3c71UgmlSBQmY5h1/z4ZXFpoC3nfCKUHGPXJD3emGlkUr5/XJJfyzBtMdcKJtVxN3R193aH69SjbxUXnNZN0uXrjE8lsVLAV/T4DqIEx0pJIIXQWnji1vc4GDqiDLm37XIaIsVWrk3PGHIkt+jSgLjWXU/KeMYrPuy7YMsDuJ7ix8HQPka1iglLai9FzG6uVdxXqV9nZjMMVEze2b3TUzvGg5hpzC7vIXJnI4+WStpNnStLjcu0Izq1m2PB6izA1oLUoh4FPogVWm8nNdG9oAIytYvyqnllmOyM42RANNzXOt9p/mRN40vCSUezEKuBV1GNqNfWEkeqD/BUGi0ewpC64avnWbGGb072lO0T/7ffI+xxVoM3wsiLCDyy/odYjBnRbwQXThyPZlHiy6AZwc8FKPEsbbMQa65sPfbaQfObQoYQH06Y2zQIsKn8BYwcvJQrlKpjslOyeY1e2SjAAZquavE=
+  on:
+    tags: true
