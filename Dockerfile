@@ -52,7 +52,7 @@ COPY docker/gdam /etc/service/gdam/run
 
 EXPOSE 44444
 
-ENV GDAM_VERSION 1.0.1
+ENV GDAM_VERSION 1.2.1
 
 ENV GDB_DATA_DIR /data
 VOLUME $GDB_DATA_DIR
