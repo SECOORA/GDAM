@@ -58,7 +58,7 @@ $ docker run -it \
     -name sgs-gdam \
     -v "ZMQ_URL=tcp://127.0.0.1:9000" \
     -v "MONGO_URL=mongodb://localhost:27017" \
-    axiom/GDAM
+    axiom/gdam
 Watching /data
 Inserting into mongodb://localhost:27017
 Publishing to tcp://127.0.0.1:9000
@@ -112,7 +112,7 @@ $ docker run -it \
     -v /my/config:/config:ro \
     -v /my/output:/output \
     -e "ZMQ_URL=tcp://127.0.0.1:9000" \
-    axiom/GDAM2NC
+    axiom/gdam2nc
 Loading configuration from /config
 Listening to tcp://127.0.0.1:9000
 Saving to /output
