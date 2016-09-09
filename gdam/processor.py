@@ -21,9 +21,10 @@ import zmq
 import pymongo
 from pyinotify import ProcessEvent
 
-from gbdr import GliderBDReader, MergedGliderBDReader
+from gutils.gbdr import GliderBDReader, MergedGliderBDReader
 
-from gdam import logger
+import logging
+logger = logging.getLogger(__name__)
 
 
 class GliderPairInserter(object):
@@ -138,37 +139,36 @@ class GliderFileProcessor(ProcessEvent):
 
         self.glider_data = {}
 
+        # Create ZMQ context and socket for publishing files
+        context = zmq.Context()
+        self.socket = context.socket(zmq.PUB)
+        self.socket.bind(self.zmq_url)
+
     def process_segment_pair(self, glider, path, file_base, pair):
         segment_id = int(file_base[file_base.rfind('-') + 1:file_base.find('.')])
-        logger.info(
-            "Publishing glider {0} segment {1:d} data in {2} named {3} pair {4}".format(
-                glider,
-                segment_id,
-                path,
-                file_base,
-                pair
-            )
-        )
 
         flight_file = file_base + pair[0]
         science_file = file_base + pair[1]
 
+        dupe = False
         inserter = GliderPairInserter(glider, pair, self.mongo_url)
         try:
             inserter.insert_filenames(glider, flight_file, science_file)
         except LookupError:
-            logger.excpetion('Duplicate detected')
-            return
+            logger.warning('Duplicate detected')
+            dupe = True
 
         # Read the file
         flight_reader = GliderBDReader([os.path.join(path, flight_file)])
         science_reader = GliderBDReader([os.path.join(path, science_file)])
         merged_reader = MergedGliderBDReader(flight_reader, science_reader)
 
-        for data in merged_reader:
-            inserter.insert_data(data)
-
-        inserter.update_file_timespan()
+        if dupe is False:
+            for data in merged_reader:
+                inserter.insert_data(data)
+            inserter.update_file_timespan()
+        else:
+            inserter = None
 
         self.publish_segment_processed(
             glider, segment_id,
@@ -177,12 +177,8 @@ class GliderFileProcessor(ProcessEvent):
         )
 
     def publish_segment_processed(self, glider, segment_id, path, flight_file, science_file, merged_reader, inserter):  # NOQA
-        # Create ZMQ context and socket for publishing files
-        context = zmq.Context()
-        socket = context.socket(zmq.PUB)
-        socket.bind(self.zmq_url)
 
-        logger.info(
+        logger.debug(
             'Publishing glider {0} segment {1:d} data in {2} & {3}'.format(
                 glider,
                 segment_id,
@@ -191,17 +187,18 @@ class GliderFileProcessor(ProcessEvent):
             )
         )
 
-        socket.send_json({
-            'processed': inserter.processed.isoformat(),
-            'start': inserter.start.isoformat(),
-            'end': inserter.end.isoformat(),
+        message = {
+            'processed': inserter.processed.isoformat() if inserter else None,
+            'start': inserter.start.isoformat() if inserter else None,
+            'end': inserter.end.isoformat() if inserter else None,
             'path': path,
             'flight_file': flight_file,
             'science_file': science_file,
             'glider': glider,
             'segment': segment_id,
             'headers': merged_reader.headers
-        })
+        }
+        self.socket.send_json(message)
 
         self.glider_data[glider]['files'].remove(flight_file)
         self.glider_data[glider]['files'].remove(science_file)

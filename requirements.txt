@@ -1,4 +1,4 @@
-gbdr>=1.0.1
+gutils
 pyinotify
 pymongo
 pyzmq

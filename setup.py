@@ -20,8 +20,8 @@ setup(
     name='gdam',
     version=version(),
     description='Watches a directory for new *db flight/science files and '
-                'inserts the data into a MongoDB instance and then publishes '
-                'the data to a ZeroMQ socket.',
+                'inserts the data into a MongoDB instance and publishes the '
+                'data to a ZeroMQ socket.',
     long_description=readme(),
     license='MIT',
     author='Michael Lindemuth',
@@ -30,7 +30,10 @@ setup(
     url='https://github.com/axiom-data-science/GDAM',
     packages=['gdam'],
     entry_points = {
-        'console_scripts': ['gdam-cli=gdam.cli:main'],
+        'console_scripts': [
+            'gdam-cli=gdam.cli:main',
+            'gdam2nc=gdam.nc:main'
+        ],
     },
     classifiers=[
         'Development Status :: 5 - Production/Stable',

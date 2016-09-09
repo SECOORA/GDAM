@@ -1,6 +1,6 @@
 package:
     name: gdam
-    version: "1.0.1"
+    version: "1.1.0"
 
 source:
     path: ../
@@ -15,21 +15,25 @@ requirements:
         - setuptools
     run:
         - python
-        - gbdr
         - pyinotify
         - pymongo
         - pyzmq
+        - gutils
 
 test:
+    requires:
+        - pytest
     imports:
         - gdam
+        - gdam.nc
         - gdam.cli
-        - gdam.listen
         - gdam.processor
     commands:
         - gdam-cli -h
+        - gdam2nc -h
 
 about:
     home: https://github.com/axiom-data-science/GDAM
     license: MIT License
-    summary: 'A MongoDB store for Teledyne Webb Gliders.'
+    license_file: LICENSE
+    summary: Watches a directory for new *db flight/science files, inserts the data into a MongoDB instance, and publishes the data to a ZeroMQ socket.

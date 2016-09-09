@@ -1,0 +1,45 @@
+version: '2'
+
+services:
+
+  mongo:
+    image: mongo
+
+  web:
+    image: mongo-express
+    environment:
+      ME_CONFIG_OPTIONS_EDITORTHEME: 'monokai'
+      ME_CONFIG_BASICAUTH_USERNAME: 'admin'
+      ME_CONFIG_BASICAUTH_PASSWORD: 'admin'
+    ports:
+      - 60201:8081
+    depends_on:
+      - mongo
+
+  gdam:
+    build:
+        context: ..
+        dockerfile: Dockerfile
+    environment:
+      MONGO_URL: "mongodb://mongo:27017"
+      ZMQ_URL: "tcp://*:44444"
+      GDB_DATA_DIR: /data
+    volumes:
+      - "./data:/data:ro"
+    depends_on:
+      - mongo
+    entrypoint: "docker/wait.sh mongo:27017 --strict --timeout=30 -- /sbin/my_init"
+
+  gdam2nc:
+    build:
+        context: ..
+        dockerfile: Dockerfile-gdam2nc
+    environment:
+      ZMQ_URL: "tcp://gdam:44444"
+    volumes:
+      - "./data:/data:ro"
+      - "./config:/config:ro"
+      - "./output:/output"
+    depends_on:
+      - gdam
+    entrypoint: "docker/wait.sh gdam:44444 --strict --timeout=30 -- /sbin/my_init"
