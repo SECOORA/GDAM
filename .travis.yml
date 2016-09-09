@@ -1,0 +1,46 @@
+language: python
+python:
+  - "3.5"
+
+sudo: required
+services:
+  - docker
+
+install:
+  # Install miniconda
+  # -----------------
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+
+  # Setup conda
+  # ------------------------------------
+  - conda config --set always_yes yes --set changeps1 no
+  - conda config --set show_channel_urls True
+  - conda config --add channels conda-forge
+  - conda config --add channels axiom-data-science
+  - conda update --quiet conda
+
+  # Create our environment
+  # ------------------------------------
+  - ENV_NAME='test'
+  - conda create --quiet -n $ENV_NAME python=$TRAVIS_PYTHON_VERSION
+  - source activate $ENV_NAME
+
+  # Install testing requirements
+  # ------------------------------------
+  - conda install --file requirements.txt pytest
+  - conda list --export
+
+script:
+  - py.test -s -rxs -v
+
+after_success:
+  - export TAG=`if [ "$TRAVIS_TAG" == "" ]; then echo "latest"; else echo $TRAVIS_TAG ; fi`
+  - docker build -t axiom/gdam:$TAG .
+  - docker build -t axiom/gdam2nc:$TAG -f Dockerfile-gdam2nc .
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+    docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker push axiom/gdam:$TAG;
+    docker push axiom/gdam2nc:$TAG;
+    fi

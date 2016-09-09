@@ -1,5 +1,7 @@
 # Glider Database Alternative - Mongo (GDAM)
 
+[![Build Status](https://travis-ci.org/SECOORA/GDAM.svg?branch=master)](https://travis-ci.org/SECOORA/GDAM)
+
 Watches a directory for new *db flight/science files, inserts the data into a MongoDB instance, and publishes the data to a ZeroMQ socket. Includes a command line tool to listen to the ZeroMQ socket and write netCDF files.
 
 
