@@ -17,7 +17,6 @@ import subprocess
 import zmq
 
 import logging
-logging.captureWarnings(True)
 logger = logging.getLogger(__name__)
 
 
@@ -45,10 +44,29 @@ def handle_message(message, config_path, output_path):
         message['science_file']
     )
 
+    glider_name = message['glider']
+    deployment_name = message['deployment']
+
+    config_folder_options = [
+        os.path.join(config_path, '{}__{}'.format(glider_name, deployment_name)),
+        os.path.join(config_path, '{}_{}'.format(glider_name, deployment_name)),
+        os.path.join(config_path, '{}-{}'.format(glider_name, deployment_name)),
+        os.path.join(config_path, glider_name),
+    ]
+    config_folder = None
+    for cp in config_folder_options:
+        if os.path.isdir(cp):
+            config_folder = cp
+            break
+    if config_folder is None:
+        raise ValueError("No config folder found for Glider {} and Deployment {}".format(
+            glider_name,
+            deployment_name
+        ))
+
     cmds = [
         "create_glider_netcdf.py",
-        message['glider'],
-        config_path,
+        config_folder,
         output_path,
         "--mode",
         mode,
@@ -75,7 +93,6 @@ def handle_message(message, config_path, output_path):
 def main():
     logger.setLevel(logging.INFO)
     logger.addHandler(logging.StreamHandler())
-    logging.getLogger('py.warnings').setLevel(logging.ERROR)
 
     parser = argparse.ArgumentParser(
         description="Subscribes to the Glider Database Alternative with Mongo "

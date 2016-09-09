@@ -37,19 +37,20 @@ class GliderPairInserter(object):
 
     gps_fields = ("m_gps_lon-lon", "m_lon-lon", "c_wpt_lon-lon")
 
-    def __init__(self, glider, pair, mongo_url, dbname='GDAM'):
-        self.glider = glider
+    def __init__(self, glider, deployment, pair, mongo_url, dbname=None):
         self.pair = pair
         self.start = datetime.utcnow()
         self.end = datetime.utcfromtimestamp(0)
-        self.mongo_url = mongo_url
-
         self.processed = datetime.utcnow()
-        self.mongo_client = pymongo.MongoClient(self.mongo_url)
+
+        dbname = dbname or 'GDAM'
+        self.mongo_client = pymongo.MongoClient(mongo_url)
         self.db = self.mongo_client[dbname]
 
-        self.collection_name = "%s.%s%s" % (
+        deployment = deployment or 'unknown'
+        self.collection_name = "{}.{}.{}{}".format(
             glider,
+            deployment,
             pair[0],
             pair[1]
         )
@@ -74,8 +75,12 @@ class GliderPairInserter(object):
 
         return data
 
-    def insert_filenames(self, glider, flight_file, science_file):
-        file_collection_name = "%s.processed_files" % glider
+    def insert_filenames(self, glider, deployment, flight_file, science_file):
+        deployment = deployment or 'unknown'
+        file_collection_name = "%s.%s.processed_files" % (
+            glider,
+            deployment
+        )
         self.file_collection = self.db[file_collection_name]
 
         duplicate_set = self.file_collection.find({
@@ -144,16 +149,16 @@ class GliderFileProcessor(ProcessEvent):
         self.socket = context.socket(zmq.PUB)
         self.socket.bind(self.zmq_url)
 
-    def process_segment_pair(self, glider, path, file_base, pair):
+    def process_segment_pair(self, glider, deployment, path, file_base, pair):
         segment_id = int(file_base[file_base.rfind('-') + 1:file_base.find('.')])
 
         flight_file = file_base + pair[0]
         science_file = file_base + pair[1]
 
         dupe = False
-        inserter = GliderPairInserter(glider, pair, self.mongo_url)
+        inserter = GliderPairInserter(glider, deployment, pair, self.mongo_url)
         try:
-            inserter.insert_filenames(glider, flight_file, science_file)
+            inserter.insert_filenames(glider, deployment, flight_file, science_file)
         except LookupError:
             logger.warning('Duplicate detected')
             dupe = True
@@ -171,14 +176,14 @@ class GliderFileProcessor(ProcessEvent):
             inserter = None
 
         self.publish_segment_processed(
-            glider, segment_id,
+            glider, deployment, segment_id,
             path, flight_file, science_file,
             merged_reader, inserter
         )
 
-    def publish_segment_processed(self, glider, segment_id, path, flight_file, science_file, merged_reader, inserter):  # NOQA
+    def publish_segment_processed(self, glider, deployment, segment_id, path, flight_file, science_file, merged_reader, inserter):  # NOQA
 
-        logger.debug(
+        logger.info(
             'Publishing glider {0} segment {1:d} data in {2} & {3}'.format(
                 glider,
                 segment_id,
@@ -195,6 +200,7 @@ class GliderFileProcessor(ProcessEvent):
             'flight_file': flight_file,
             'science_file': science_file,
             'glider': glider,
+            'deployment': deployment,
             'segment': segment_id,
             'headers': merged_reader.headers
         }
@@ -206,7 +212,14 @@ class GliderFileProcessor(ProcessEvent):
     def check_for_pair(self, event):
         if len(event.name) > 0 and event.name[0] is not '.':
             # Add full path to glider data queue
-            glider_name = event.path[event.path.rfind('/') + 1:]
+            folder_name = os.path.basename(event.path)
+            if '__' in folder_name:
+                glider_name, glider_deployment = (folder_name.split('__', maxsplit=1))
+            else:
+                glider_name = folder_name
+                glider_deployment = ''
+
+            glider_name = os.path.basename(event.path)
             if glider_name not in self.glider_data:
                 self.glider_data[glider_name] = {}
                 self.glider_data[glider_name]['path'] = event.path
@@ -227,7 +240,7 @@ class GliderFileProcessor(ProcessEvent):
                 if checkFile in self.glider_data[glider_name]['files']:
                     try:
                         self.process_segment_pair(
-                            glider_name, event.path, event.name[:-3], pair
+                            glider_name, glider_deployment, event.path, event.name[:-3], pair
                         )
                     except BaseException:
                         logger.exception(

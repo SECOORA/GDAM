@@ -41,14 +41,12 @@ from pyinotify import (
 from gdam.processor import GliderFileProcessor
 
 import logging
-logging.captureWarnings(True)
 logger = logging.getLogger(__name__)
 
 
 def main():
     logger.setLevel(logging.INFO)
     logger.addHandler(logging.StreamHandler())
-    logging.getLogger('py.warnings').setLevel(logging.ERROR)
 
     parser = argparse.ArgumentParser(
         description="Monitor a directory for new glider data. "
