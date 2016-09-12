@@ -85,10 +85,6 @@ def main():
                      "GDB_DATA_DIR environmental variable")
         sys.exit(parser.print_usage())
 
-    monitor_path = args.data_path
-    if monitor_path[-1] == '/':
-        monitor_path = monitor_path[:-1]
-
     wm = WatchManager()
     mask = IN_MOVED_TO | IN_CLOSE_WRITE
     wm.add_watch(

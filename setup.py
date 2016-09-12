@@ -32,7 +32,8 @@ setup(
     entry_points = {
         'console_scripts': [
             'gdam-cli=gdam.cli:main',
-            'gdam2nc=gdam.nc:main'
+            'gdam2nc=gdam.nc:main',
+            'nc2ftp=gdam.ftp:main'
         ],
     },
     classifiers=[

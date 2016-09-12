@@ -47,15 +47,21 @@ RUN conda install -y \
         && \
     conda clean -a -y
 
-RUN mkdir /etc/service/gdam
-COPY docker/gdam /etc/service/gdam/run
+RUN mkdir -p /etc/my_init.d
+COPY docker/init/* /etc/my_init.d/
+
+ENV GDB_DATA_DIR /data
+VOLUME $GDB_DATA_DIR
+
+ENV GDAM2NC_OUTPUT /output
+VOLUME $GDAM2NC_OUTPUT
+
+ENV GDAM2NC_CONFIG /config
+VOLUME $GDAM2NC_CONFIG
 
 EXPOSE 44444
 
 ENV GDAM_VERSION 1.2.1
-
-ENV GDB_DATA_DIR /data
-VOLUME $GDB_DATA_DIR
 
 ENV PROJECT_ROOT /code
 RUN mkdir -p "$PROJECT_ROOT"

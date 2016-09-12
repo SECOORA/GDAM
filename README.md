@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/SECOORA/GDAM.svg?branch=master)](https://travis-ci.org/SECOORA/GDAM)
 
-Watches a directory for new *db flight/science files, inserts the data into a MongoDB instance, and publishes the data to a ZeroMQ socket. Includes a command line tool to listen to the ZeroMQ socket and write netCDF files.
+Watches a directory for new *db flight/science files, inserts the data into a MongoDB instance, and publishes the data to a ZeroMQ socket. Includes a command line tool to listen to the ZeroMQ socket and write netCDF files and a tool for listening for new netCDF files and uploading them to an FTP server.
 
 
 ## Installation
@@ -58,6 +58,7 @@ $ docker run -it \
     -name sgs-gdam \
     -v "ZMQ_URL=tcp://127.0.0.1:9000" \
     -v "MONGO_URL=mongodb://localhost:27017" \
+    -e "RUN_GDAM=yes" \
     axiom/gdam
 Watching /data
 Inserting into mongodb://localhost:27017
@@ -112,10 +113,60 @@ $ docker run -it \
     -v /my/config:/config:ro \
     -v /my/output:/output \
     -e "ZMQ_URL=tcp://127.0.0.1:9000" \
-    axiom/gdam2nc
+    -e "RUN_GDAM2NC=yes" \
+    axiom/gdam
 Loading configuration from /config
 Listening to tcp://127.0.0.1:9000
 Saving to /output
+```
+
+## `nc2ftp`
+
+#### CLI
+
+```bash
+$ nc2ftp --help
+```
+
+You can specify the output directory and FTP credentials via the command line
+
+```bash
+$ nc2ftp -i /output --ftp_url ftp.ioo.us --ftp_user youruser --ftp_pass yourpass
+Watching /output
+Uploading to ftp.ioos.us
+```
+
+```bash
+$ export NC2FTPURL="ftp.ioos.us"
+$ export NC2FTPUSER="youruser"
+$ export NC2FTPPASS="yourpass"
+$ nc2ftp
+Watching /output
+Uploading to ftp.ioos.us
+```
+
+```bash
+$ NC2FTPURL="ftp.ioos.us" NC2FTPUSER="youruser" NC2FTPPASS="yourpass" nc2ftp
+Watching /output
+Uploading to ftp.ioos.us
+```
+
+
+#### Docker
+
+The docker image uses `nc2ftp` internally. Set the environmental variables as needed when calling `docker run`. You want to point `-i, --input` or `GDAM2NC_OUTPUT` to the root directory where the GDAM2NC system is saving netCDF files. The default is `/output`.
+
+```bash
+$ docker run -it \
+    -name sgs-nc2ftp \
+    -v /my/output:/output:ro \
+    -e "NC2FTPURL=ftp.ioos.us" \
+    -e "NC2FTPUSER=youruser" \
+    -e "NC2FTPPASS=yourpass" \
+    -e "RUN_NC2FTP=yes" \
+    axiom/gdam
+Watching /output
+Uploading to ftp.ioos.us
 ```
 
 

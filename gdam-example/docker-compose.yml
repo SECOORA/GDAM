@@ -17,13 +17,12 @@ services:
       - mongo
 
   gdam:
-    build:
-        context: ..
-        dockerfile: Dockerfile
+    build: ../
     environment:
       MONGO_URL: "mongodb://mongo:27017"
       ZMQ_URL: "tcp://*:44444"
       GDB_DATA_DIR: /data
+      RUN_GDAM: "yes"
     volumes:
       - "./data:/data:ro"
     depends_on:
@@ -31,11 +30,10 @@ services:
     entrypoint: "docker/wait.sh mongo:27017 --strict --timeout=30 -- /sbin/my_init"
 
   gdam2nc:
-    build:
-        context: ..
-        dockerfile: Dockerfile-gdam2nc
+    build: ../
     environment:
       ZMQ_URL: "tcp://gdam:44444"
+      RUN_GDAM2NC: "yes"
     volumes:
       - "./data:/data:ro"
       - "./config:/config:ro"
@@ -43,3 +41,15 @@ services:
     depends_on:
       - gdam
     entrypoint: "docker/wait.sh gdam:44444 --strict --timeout=30 -- /sbin/my_init"
+
+  nc2ftp:
+    build: ../
+    environment:
+      NC2FTPURL: ftp.ioos.us
+      NC2FTPUSER: youruser
+      NC2FTPPASS: yourpass
+      RUN_NC2FTP: "yes"
+    volumes:
+      - "./output:/output:ro"
+    depends_on:
+      - gdam2nc

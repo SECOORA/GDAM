@@ -51,6 +51,7 @@ def handle_message(message, config_path, output_path):
         os.path.join(config_path, '{}__{}'.format(glider_name, deployment_name)),
         os.path.join(config_path, '{}_{}'.format(glider_name, deployment_name)),
         os.path.join(config_path, '{}-{}'.format(glider_name, deployment_name)),
+        os.path.join(config_path, glider_name, deployment_name),
         os.path.join(config_path, glider_name),
     ]
     config_folder = None
