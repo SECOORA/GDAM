@@ -48,21 +48,30 @@ class GliderNc2FtpProcessor(ProcessEvent):
             ftp = FTP(self.ftp_url)
             ftp.login(self.ftp_user, self.ftp_pass)
 
+            logger.info("Opening {}".format(event.pathname))
             with nc4.Dataset(event.pathname) as ncd:
+                if not hasattr(ncd, 'id'):
+                    raise ValueError("No 'id' global attribute")
                 # Change into the correct deployment directory
-                ftp.cwd(ncd.id)
+                try:
+                    ftp.cwd(ncd.id)
+                except BaseException:
+                    ftp.mkd(ncd.id)
+                    ftp.cwd(ncd.id)
 
             with open(event.pathname, 'rb') as fp:
                 # Upload NetCDF file
+                uploading = os.path.basename(event.pathname)
                 ftp.storbinary(
-                    'STOR {}'.format(os.path.basename(event.pathname)),
+                    'STOR {}'.format(uploading),
                     fp
                 )
+                logger.info("Uploaded file: {}".format(uploading))
 
             ftp.quit()
 
         except BaseException:
-            logger.exception('Could not upload NetCDF file')
+            logger.exception('Could not upload: {}'.format(event.pathname))
 
 
 def main():
