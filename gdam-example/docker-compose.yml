@@ -45,11 +45,19 @@ services:
   nc2ftp:
     build: ../
     environment:
-      NC2FTPURL: ftp.ioos.us
-      NC2FTPUSER: youruser
-      NC2FTPPASS: yourpass
+      NC2FTPURL: ftp
+      NC2FTPUSER: thisisme
+      NC2FTPPASS: thisismypass
       RUN_NC2FTP: "yes"
     volumes:
       - "./output:/output:ro"
     depends_on:
       - gdam2nc
+
+  ftp:
+    image: webdevops/vsftp
+    environment:
+      FTP_USER: thisisme
+      FTP_PASSWORD: thisismypass
+    volumes:
+      - ./ftp:/data/ftp
