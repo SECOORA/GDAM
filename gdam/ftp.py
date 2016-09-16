@@ -48,7 +48,6 @@ class GliderNc2FtpProcessor(ProcessEvent):
             ftp = FTP(self.ftp_url)
             ftp.login(self.ftp_user, self.ftp_pass)
 
-            logger.info("Opening {}".format(event.pathname))
             with nc4.Dataset(event.pathname) as ncd:
                 if not hasattr(ncd, 'id'):
                     raise ValueError("No 'id' global attribute")
@@ -68,10 +67,11 @@ class GliderNc2FtpProcessor(ProcessEvent):
                 )
                 logger.info("Uploaded file: {}".format(uploading))
 
-            ftp.quit()
+        except BaseException as e:
+            logger.error('Could not upload: {}. {}.'.format(event.pathname, e))
 
-        except BaseException:
-            logger.exception('Could not upload: {}'.format(event.pathname))
+        finally:
+            ftp.quit()
 
 
 def main():
