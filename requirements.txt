@@ -1,4 +1,4 @@
-gutils
+gutils>=1.2.5
 pyinotify
 pymongo
 pyzmq
