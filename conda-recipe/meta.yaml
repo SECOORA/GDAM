@@ -19,6 +19,8 @@ requirements:
         - pymongo
         - pyzmq
         - gutils
+        - compliance-checker
+        - cc-plugin-glider
 
 test:
     requires:
@@ -31,6 +33,7 @@ test:
     commands:
         - gdam-cli -h
         - gdam2nc -h
+        - nc2ftp -h
 
 about:
     home: https://github.com/axiom-data-science/GDAM
