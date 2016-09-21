@@ -2,6 +2,8 @@
 
 import os
 import sys
+import json
+import tempfile
 import argparse
 from ftplib import FTP
 
@@ -13,11 +15,45 @@ from pyinotify import (
     IN_CLOSE_WRITE,
     IN_MOVED_TO
 )
-
 from pyinotify import ProcessEvent
+from compliance_checker.runner import ComplianceChecker, CheckSuite
 
 import logging
 logger = logging.getLogger(__name__)
+
+
+def profile_compliance(filepath):
+    check_suite = CheckSuite()
+    check_suite.load_all_available_checkers()
+
+    _, outfile = tempfile.mkstemp()
+
+    try:
+        return_value, errors = ComplianceChecker.run_checker(
+            ds_loc=filepath,
+            checker_names=['gliderdac'],
+            verbose=True,
+            criteria='normal',
+            output_format='json',
+            output_filename=outfile
+        )
+        assert errors is False
+        return True
+    except AssertionError:
+        with open(outfile, 'rt') as f:
+            ers = json.loads(f.read())
+            for k, v in ers.items():
+                if isinstance(v, list):
+                    for x in v:
+                        if 'msgs' in x and x['msgs']:
+                            logger.debug(x['msgs'])
+        return False
+    except BaseException as e:
+        logger.warning(e)
+        return False
+    finally:
+        if os.path.isfile(outfile):
+            os.remove(outfile)
 
 
 class GliderNc2FtpProcessor(ProcessEvent):
@@ -28,11 +64,11 @@ class GliderNc2FtpProcessor(ProcessEvent):
         self.ftp_pass = ftp_pass
 
     def process_IN_CLOSE(self, event):
-        if self.valid_extension(event.name):
+        if self.valid_extension(event.name) and profile_compliance(event.pathname):
             self.upload_file(event)
 
     def process_IN_MOVED_TO(self, event):
-        if self.valid_extension(event.name):
+        if self.valid_extension(event.name) and profile_compliance(event.pathname):
             self.upload_file(event)
 
     def valid_extension(self, name):

@@ -2,3 +2,5 @@ gutils>=1.2.5
 pyinotify
 pymongo
 pyzmq
+compliance-checker
+cc-plugin-glider
