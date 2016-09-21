@@ -52,3 +52,5 @@ coverage.xml
 docs/_build/
 
 *.nc
+!should_fail.nc
+!should_pass.nc
