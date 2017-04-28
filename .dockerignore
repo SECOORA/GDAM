@@ -1,1 +1,6 @@
 gdam-example/
+conda-recipe/
+.git
+.gitignore
+.travis.yml
+*.py[cod]

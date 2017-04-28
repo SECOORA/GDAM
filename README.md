@@ -26,27 +26,44 @@ $ gdam-cli --help
 You can specify the ZeroMQ socket and MongoDB connection via command line
 arguments or environmental variables:
 
-```bash
-$ gdam-cli -d /data --zmg_url tcp://127.0.0.1:9000 --mongo_url mongodb://localhost:27017
-Watching /data
-Inserting into mongodb://localhost:27017
-Publishing to tcp://127.0.0.1:9000
-```
+
+**Defaults**
 
 ```bash
-$ export ZMQ_URL="tcp://127.0.0.1:9000"
+$ gdam-cli
+Watching /data
+Inserting into mongodb://localhost:27017
+Publishing to tcp://127.0.0.1:44444
+```
+
+**Command args**
+
+```bash
+$ gdam-cli --data_path /data --zmg_url tcp://127.0.0.1:44444 --mongo_url mongodb://localhost:27017
+Watching /data
+Inserting into mongodb://localhost:27017
+Publishing to tcp://127.0.0.1:44444
+```
+
+**Env variables**
+
+```bash
+$ export ZMQ_URL="tcp://127.0.0.1:44444"
 $ export MONGO_URL="mongodb://localhost:27017"
-$ gdam-cli -d /data
+$ export GDB_DATA_DIR="/data"
+$ gdam-cli
 Watching /data
 Inserting into mongodb://localhost:27017
-Publishing to tcp://127.0.0.1:9000
+Publishing to tcp://127.0.0.1:44444
 ```
 
+**Mix and match**
+
 ```bash
-$ ZMQ_URL="tcp://127.0.0.1:9000" MONGO_URL="mongodb://localhost:27017" gdam-cli -d /data
+$ ZMQ_URL="tcp://127.0.0.1:44444" MONGO_URL="mongodb://localhost:27017" gdam-cli --data_path /data
 Watching /data
 Inserting into mongodb://localhost:27017
-Publishing to tcp://127.0.0.1:9000
+Publishing to tcp://127.0.0.1:44444
 ```
 
 #### Docker
@@ -56,13 +73,13 @@ The docker image uses `gdam-cli` internally. Set the `ZMQ_URL` and `MONGO_URL` v
 ```bash
 $ docker run -it \
     -name sgs-gdam \
-    -v "ZMQ_URL=tcp://127.0.0.1:9000" \
+    -v "ZMQ_URL=tcp://127.0.0.1:44444" \
     -v "MONGO_URL=mongodb://localhost:27017" \
     -e "RUN_GDAM=yes" \
     axiom/gdam
 Watching /data
 Inserting into mongodb://localhost:27017
-Publishing to tcp://127.0.0.1:9000
+Publishing to tcp://127.0.0.1:44444
 ```
 
 
@@ -77,26 +94,26 @@ $ gdam2nc --help
 You can specify the ZeroMQ socket via command line argument or environmental variable:
 
 ```bash
-$ gdam2nc --zmg_url tcp://127.0.0.1:9000 --configs /config --output /output
+$ gdam2nc --zmg_url tcp://127.0.0.1:44444 --configs /config --output /output
 Loading configuration from /config
-Listening to tcp://127.0.0.1:9000
+Listening to tcp://127.0.0.1:44444
 Saving to /output
 ```
 
 ```bash
-$ export ZMQ_URL="tcp://127.0.0.1:9000"
+$ export ZMQ_URL="tcp://127.0.0.1:44444"
 $ export GDAM2NC_CONFIG="/config"
 $ export GDAM2NC_OUTPUT="/output"
 $ gdam2nc
 Loading configuration from /config
-Listening to tcp://127.0.0.1:9000
+Listening to tcp://127.0.0.1:44444
 Saving to /output
 ```
 
 ```bash
-$ ZMQ_URL="tcp://127.0.0.1:9000" GDAM2NC_CONFIG="/config" GDAM2NC_OUTPUT="/output" gdam2nc
+$ ZMQ_URL="tcp://127.0.0.1:44444" GDAM2NC_CONFIG="/config" GDAM2NC_OUTPUT="/output" gdam2nc
 Loading configuration from /config
-Listening to tcp://127.0.0.1:9000
+Listening to tcp://127.0.0.1:44444
 Saving to /output
 ```
 
@@ -112,11 +129,11 @@ $ docker run -it \
     -name sgs-gdam2nc \
     -v /my/config:/config:ro \
     -v /my/output:/output \
-    -e "ZMQ_URL=tcp://127.0.0.1:9000" \
+    -e "ZMQ_URL=tcp://127.0.0.1:44444" \
     -e "RUN_GDAM2NC=yes" \
     axiom/gdam
 Loading configuration from /config
-Listening to tcp://127.0.0.1:9000
+Listening to tcp://127.0.0.1:44444
 Saving to /output
 ```
 
@@ -131,7 +148,7 @@ $ nc2ftp --help
 You can specify the output directory and FTP credentials via the command line
 
 ```bash
-$ nc2ftp -i /output --ftp_url ftp.ioo.us --ftp_user youruser --ftp_pass yourpass
+$ nc2ftp -i /output --ftp_url ftp.ioos.us --ftp_user youruser --ftp_pass yourpass
 Watching /output
 Uploading to ftp.ioos.us
 ```

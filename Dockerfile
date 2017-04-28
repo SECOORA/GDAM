@@ -1,6 +1,8 @@
-FROM phusion/baseimage:0.9.19
+FROM phusion/baseimage:0.9.21
 # Use baseimage-docker's init system
 CMD ["/sbin/my_init"]
+ENV KILL_PROCESS_TIMEOUT 30
+ENV KILL_ALL_PROCESSES_TIMEOUT 30
 
 MAINTAINER Kyle Wilcox <kyle@axiomdatascience.com>
 ENV DEBIAN_FRONTEND noninteractive
@@ -22,7 +24,7 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Setup CONDA (https://hub.docker.com/r/continuumio/miniconda3/~/dockerfile/)
-ENV MINICONDA_VERSION 4.1.11
+ENV MINICONDA_VERSION 4.2.12
 RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
     curl -k -o /miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-$MINICONDA_VERSION-Linux-x86_64.sh && \
     /bin/bash /miniconda.sh -b -p /opt/conda && \
