@@ -1,6 +1,6 @@
 package:
     name: gdam
-    version: "1.2.3"
+    version: "1.2.4"
 
 source:
     path: ../
@@ -14,13 +14,13 @@ requirements:
         - python
         - setuptools
     run:
-        - python
+        - cc-plugin-glider
+        - compliance-checker
+        - gutils >=1.2.6
         - pyinotify
         - pymongo
+        - python
         - pyzmq
-        - gutils
-        - compliance-checker
-        - cc-plugin-glider
 
 test:
     requires:
